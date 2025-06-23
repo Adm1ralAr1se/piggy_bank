@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Piggy Bank Application</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Your Piggy Bank</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Add Savings</h2>
+            <form action="/add_savings" method="POST">
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" name="amount" required>
+                <button type="submit">Add</button>
+            </form>
+        </section>
+        <section>
+            <h2>Your Savings</h2>
+            <ul id="savings-list">
+                <!-- Savings will be dynamically inserted here -->
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 Piggy Bank Application</p>
+    </footer>
+</body>
+</html>
