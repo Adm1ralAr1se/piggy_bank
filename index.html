@@ -7,27 +7,105 @@
     <title>Piggy Bank Application</title>
 </head>
 <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
     <header>
-        <h1>Welcome to Your Piggy Bank</h1>
+        <h1>Welcome to My Piggy Bank 🐷</h1>
     </header>
     <main>
-        <section>
-            <h2>Add Savings</h2>
-            <form action="/add_savings" method="POST">
-                <label for="amount">Amount:</label>
-                <input type="number" id="amount" name="amount" required>
-                <button type="submit">Add</button>
-            </form>
-        </section>
         <section>
             <h2>Your Savings</h2>
             <ul id="savings-list">
                 <!-- Savings will be dynamically inserted here -->
             </ul>
         </section>
+        <section>
+            <h2>Create a New Piggy Bank</h2>
+            <form action="{{ url_for('create_bank') }}" method="post" class="mb-3">
+                <input type="text" name="bank_name" placeholder="Bank Name" required>
+                <input type="text" name="emoji" placeholder="Emoji (e.g. 🐷)" maxlength="2">
+                <input type="text" name="note" placeholder="Note or Purpose" maxlength="50">
+                <input type="number" name="transfer_limit" step="0.01" min="0.01" placeholder="Daily Transfer Limit (₱)" required>
+                <button type="submit">Create</button>
+            </form>
+        </section>
+        <section>
+            <h2>All Piggy Banks</h2>
+            {% if piggy_banks %}
+                <ul>
+                {% for bank, coins in piggy_banks.items() %}
+                    <li>
+                        <strong>
+                            {{ coins['emoji'] or '' }} {{ bank }}
+                        </strong>
+                        <!-- Edit name form -->
+                        <form action="{{ url_for('edit_bank_name') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="old_name" value="{{ bank }}">
+                            <input type="text" name="new_name" placeholder="New Name" required style="width:100px;">
+                            <button type="submit" class="btn btn-sm btn-secondary">Edit Name</button>
+                        </form>
+                        <br>
+                        {% if coins['note'] %}
+                            <em>{{ coins['note'] }}</em><br>
+                        {% endif %}
+                        0.25: {{ coins['0.25'] }}<br>
+                        0.10: {{ coins['0.10'] }}<br>
+                        0.05: {{ coins['0.05'] }}<br>
+                        <strong>Balance: ₱{{ "%.2f"|format(
+                            coins['0.25']*0.25 + coins['0.10']*0.10 + coins['0.05']*0.05
+                        ) }}</strong>
+                        <form action="{{ url_for('add_coin') }}" method="post" style="margin-top:5px;">
+                            <input type="hidden" name="bank_name" value="{{ bank }}">
+                            <select name="denomination">
+                                <option value="0.25">0.25</option>
+                                <option value="0.10">0.10</option>
+                                <option value="0.05">0.05</option>
+                            </select>
+                            <button type="submit">Add Coin</button>
+                        </form>
+                        <!-- Withdrawal form -->
+                        <form action="{{ url_for('withdraw') }}" method="post" style="margin-top:5px;">
+                            <input type="hidden" name="bank_name" value="{{ bank }}">
+                            <input type="number" name="amount" step="0.05" min="0.05" placeholder="Withdraw Amount" required>
+                            <button type="submit">Withdraw</button>
+                        </form>
+                    </li>
+                    <hr>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No piggy banks yet.</p>
+            {% endif %}
+        </section>
+        <section>
+            <h2>Transfer Funds</h2>
+            <form action="{{ url_for('transfer') }}" method="post" class="mb-3">
+                <label for="from_bank">From:</label>
+                <select name="from_bank" required>
+                    {% for bank in piggy_banks.keys() %}
+                        <option value="{{ bank }}">{{ bank }}</option>
+                    {% endfor %}
+                </select>
+                <label for="to_bank">To:</label>
+                <select name="to_bank" required>
+                    {% for bank in piggy_banks.keys() %}
+                        <option value="{{ bank }}">{{ bank }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="amount" step="0.05" min="0.05" placeholder="Amount" required>
+                <button type="submit" class="btn btn-primary btn-sm">Transfer</button>
+            </form>
+        </section>
     </main>
     <footer>
-        <p>&copy; 2023 Piggy Bank Application</p>
+        <p>&copy; 2025 Piggy Bank Application</p>
     </footer>
 </body>
 </html>
